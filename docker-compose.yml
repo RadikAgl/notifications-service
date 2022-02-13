@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  web:
+    build: ./project
+    command: python manage.py runserver 0.0.0.0:8000
+    env_file:
+      - project/.env
+    volumes:
+      - ./project/:/usr/src/app/
+    ports:
+      - 8001:8000
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=secret-key
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+    depends_on:
+      - redis
+  redis:
+    image: redis:alpine
+  celery:
+    build: ./project
+    command: celery -A djnotifications worker -l info
+    volumes:
+      - ./project/:/usr/src/app/
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=secret-key
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+    depends_on:
+      - redis
+  celery-beat:
+    build: ./project
+    command: celery -A djnotifications beat -l info
+    volumes:
+      - ./project/:/usr/src/app/
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=secret-key
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+    depends_on:
+      - redis
