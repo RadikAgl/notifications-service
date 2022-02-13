@@ -4,7 +4,7 @@
 ## Установка
 Скачайте проект с репозитория Gitlab
 ```bash
-git clone
+git clone https://gitlab.com/RadikAgl/notifications_service.git
 cd project
 ```
 
