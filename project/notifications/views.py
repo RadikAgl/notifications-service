@@ -26,10 +26,9 @@ class StatisticsList(APIView):
     def get(self, request):
         mailing_count = Mailing.objects.all().count()
         messages_count = Message.objects.all().count()
-        print(list(Message.objects.all()))
-        sent_messages_count = Message.objects.filter(state='sent').count()
-        messages_in_progress_count = Message.objects.filter(state='in progress').count()
-        error_messages_count = Message.objects.filter(state='send error').count()
+        sent_messages_count = Message.objects.filter(state='4').count()
+        messages_in_progress_count = Message.objects.filter(state__in=['1', '2', '3']).count()
+        error_messages_count = Message.objects.filter(state='5').count()
         statistics = Statistics(
             mailing_count=mailing_count,
             total_messages_count=messages_count,

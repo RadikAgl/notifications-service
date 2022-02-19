@@ -1,9 +1,10 @@
 import pytz
 from django.core.validators import RegexValidator
 from django.db import models
+from django_prometheus.models import ExportModelOperationsMixin
 
 
-class Client(models.Model):
+class Client(ExportModelOperationsMixin('client'), models.Model):
     """"Модель клиента"""
     TIMEZONES = tuple(zip(pytz.all_timezones, pytz.all_timezones))
     phone_regex = RegexValidator(
@@ -23,7 +24,7 @@ class Client(models.Model):
         return f'{self.phone_number}'
 
 
-class Mailing(models.Model):
+class Mailing(ExportModelOperationsMixin('mailing'), models.Model):
     """Модель рассылки"""
     message_text = models.TextField(verbose_name='Текст сообщения')
     mailing_start_time = models.DateTimeField(verbose_name='дата и время старта рассылки')
@@ -40,13 +41,16 @@ class Mailing(models.Model):
         return self.message_text[:20]
 
 
-class Message(models.Model):
+class Message(ExportModelOperationsMixin('message'), models.Model):
     """Модель сообщения"""
     STATES = [
-        ('ST', 'sent'),
-        ('SE', 'send error'),
+        ('1', 'ready'),
+        ('2', 'in progress'),
+        ('3', 'in progress'),
+        ('4', 'sent'),
+        ('5', 'send error'),
     ]
-    sending_time = models.DateTimeField(verbose_name='дата и время окончания рассылки')
+    sending_time = models.DateTimeField(null=True, blank=True, verbose_name='время отправки сообщения')
     client = models.ForeignKey(Client, verbose_name='клиент', on_delete=models.CASCADE)
     mailing = models.ForeignKey(Mailing, verbose_name='рассылка', on_delete=models.CASCADE)
-    state = models.CharField(max_length=20, choices=STATES, default='sent', verbose_name='статус сообщения')
+    state = models.CharField(max_length=20, choices=STATES, default='1', verbose_name='статус сообщения')

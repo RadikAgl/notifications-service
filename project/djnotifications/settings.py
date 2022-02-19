@@ -13,12 +13,19 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 from celery.schedules import crontab
+from dotenv import load_dotenv
 
 import djnotifications.tasks
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv()
+email_host = os.getenv('EMAIL_HOST')
+email_host_user = os.getenv('EMAIL_HOST_USER')
+email_host_password = os.getenv('EMAIL_HOST_PASSWORD')
+email_port = os.getenv('EMAIL_PORT')
+admin_email = os.getenv('ADMIN_EMAIL')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -43,9 +50,11 @@ INSTALLED_APPS = [
     "notifications.apps.NotificationsConfig",
     "rest_framework",
     "drf_yasg",
+    "django_prometheus",
 ]
 
 MIDDLEWARE = [
+    "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -53,6 +62,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 
 ROOT_URLCONF = "djnotifications.urls"
@@ -81,7 +91,7 @@ WSGI_APPLICATION = "djnotifications.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
+        "ENGINE": "django_prometheus.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
@@ -125,17 +135,32 @@ USE_TZ = True
 
 STATIC_URL = "/staticfiles/"
 
-
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "noreply@email.com"
+ADMINS = [("testuser", admin_email), ]
+EMAIL_HOST = email_host
+EMAIL_HOST_USER = email_host_user
+EMAIL_HOST_PASSWORD = email_host_password
+EMAIL_PORT = email_port
+EMAIL_USE_TLS = False
 
 CELERY_BROKER_URL = "redis://redis:6379"
 CELERY_RESULT_BACKEND = "redis://redis:6379"
 
 CELERY_BEAT_SCHEDULE = {
-    "get_mls": {
-        "task": "djnotifications.tasks.get_mls",
+    "send_mailing": {
+        "task": "djnotifications.tasks.send_mailing",
         "schedule": crontab(minute="*/1"),
     },
+    "make_messages": {
+        "task": "djnotifications.tasks.make_messages",
+        "schedule": crontab(minute="*/1"),
+    },
+    "send_email": {
+        "task": "djnotifications.tasks.send_email",
+        "schedule": crontab(hour=10, minute=0),
+    },
 }
+
