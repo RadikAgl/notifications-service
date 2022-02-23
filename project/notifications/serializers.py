@@ -37,3 +37,27 @@ class StatisticsSerializer(serializers.Serializer):
     sent_messages_count = serializers.IntegerField()
     error_messages_count = serializers.IntegerField()
     messages_in_progress_count = serializers.IntegerField()
+
+
+class StatisticsDetail:
+    def __init__(self,
+                 mailing_text,
+                 total_messages_count=0,
+                 sent_messages_count=0,
+                 not_sent_messages_count=0,
+                 error_messages_count=0,
+                 messages_in_progress_count=0):
+        self.mailing_text = mailing_text
+        self.total_messages_count = total_messages_count
+        self.sent_messages_count = sent_messages_count
+        self.not_sent_messages_count = not_sent_messages_count
+        self.error_messages_count = error_messages_count
+        self.messages_in_progress_count = messages_in_progress_count
+
+
+class StatisticsDetailSerializer(serializers.Serializer):
+    mailing_text = serializers.CharField()
+    total_messages_count = serializers.IntegerField()
+    sent_messages_count = serializers.IntegerField()
+    error_messages_count = serializers.IntegerField()
+    messages_in_progress_count = serializers.IntegerField()
