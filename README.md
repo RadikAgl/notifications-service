@@ -2,9 +2,9 @@
 
 
 ## Установка
-Скачайте проект с репозитория Gitlab
+Скачайте проект с репозитория Github
 ```bash
-git clone https://gitlab.com/RadikAgl/notifications_service.git
+https://github.com/RadikAgl/notifications-service.git
 ```
 
 Создайте в корне директории project файл .env и поместите туда JWT токен для авторизации в сервисе отправки сообщений клиентам. В этом проекте используется данный сервис для отправки уведомлений.
